@@ -1,0 +1,5 @@
+checkpoints/
+wandb/
+data/
+results/
+vit_large_patch16_dinov3.lvd1689m.pth

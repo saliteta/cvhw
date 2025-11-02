@@ -1,0 +1,57 @@
+# ResNet9 Training Configuration
+# CIFAR-10 Image Classification
+
+model:
+  architecture: ResNet-9
+  num_classes: 10
+  input_size: [3, 32, 32]
+  parameters: ~6.6M
+
+dataset:
+  name: CIFAR-10
+  train_samples: 50000
+  test_samples: 10000
+  classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
+hyperparameters:
+  # Training settings
+  batch_size: 128
+  num_epochs: 20
+  num_workers: 2
+  
+  # Optimizer (Adam)
+  optimizer: Adam
+  learning_rate: 0.001  # α
+  beta1: 0.9            # β1
+  beta2: 0.999          # β2
+  weight_decay: 5e-4
+  
+  # Learning rate scheduler
+  scheduler: MultiStepLR
+  milestones: [50, 75]
+  gamma: 0.1
+
+data_augmentation:
+  train:
+    - RandomCrop: [32, padding=4]
+    - RandomHorizontalFlip
+    - ToTensor
+    - Normalize:
+        mean: [0.4914, 0.4822, 0.4465]
+        std: [0.2023, 0.1994, 0.2010]
+  test:
+    - ToTensor
+    - Normalize:
+        mean: [0.4914, 0.4822, 0.4465]
+        std: [0.2023, 0.1994, 0.2010]
+
+results:
+  best_epoch: 18
+  test_accuracy: 87.85%
+  test_loss: 0.376
+  checkpoint: checkpoints/resnet9_best.pth
+
+wandb:
+  project: resnet9-cifar10
+  entity: null
+

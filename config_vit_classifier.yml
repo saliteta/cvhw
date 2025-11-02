@@ -1,0 +1,78 @@
+# ViT (DINOv3) Classifier-Only Training Configuration
+# CIFAR-10 Image Classification
+
+model:
+  architecture: DINOv3-ViT-Large
+  backbone: vit_large_patch16_dinov3
+  num_classes: 10
+  input_size: [3, 448, 448]
+  total_parameters: 303,091,722
+  trainable_parameters: 12,298  # Only classifier head
+  frozen_parameters: 303,079,424  # Entire backbone frozen
+  embedding_dim: 1024
+
+dataset:
+  name: CIFAR-10
+  train_samples: 50000
+  test_samples: 10000
+  classes: ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
+hyperparameters:
+  # Training settings
+  batch_size: 64
+  num_epochs: 2
+  num_workers: 2
+  img_size: 448
+  
+  # Training mode
+  freeze_backbone: true
+  training_mode: classifier_only
+  
+  # Optimizer (Adam) - only classifier parameters
+  optimizer: Adam
+  learning_rate: 0.001  # α
+  beta1: 0.9            # β1
+  beta2: 0.999          # β2
+  weight_decay: 5e-4
+  
+  # Learning rate scheduler
+  scheduler: MultiStepLR
+  milestones: [10, 15]
+  gamma: 0.1
+
+data_augmentation:
+  train:
+    - Resize: [448, 448]
+    - RandomHorizontalFlip
+    - ToTensor
+    - Normalize:
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+  test:
+    - Resize: [448, 448]
+    - ToTensor
+    - Normalize:
+        mean: [0.485, 0.456, 0.406]
+        std: [0.229, 0.224, 0.225]
+
+pretrained:
+  source: timm
+  model_name: vit_large_patch16_dinov3
+  pretrained_weights: true
+  strategy: feature_extraction
+
+results:
+  best_epoch: 2
+  test_accuracy: 99.04%
+  test_loss: 0.032
+  checkpoint: checkpoints/dinov3_best.pth
+
+wandb:
+  project: dinov3-cifar10
+  entity: null
+
+notes: |
+  Only the classifier head (LayerNorm + Linear) is trained.
+  The DINOv3 backbone is frozen and used as a feature extractor.
+  Achieves near-perfect accuracy with minimal training.
+
